@@ -23,20 +23,18 @@ def pascal_triangle(level):
     else:
         output = list(range(level+ 1))
         for i in range(0,level+1):
-            if i == 0 or i == len(pascal_triangle(level-1)):
+            if i == 0 or i == level:
                 output[i] = 1
             else:
-                output[i] = pascal_triangle(level-1)[i] + pascal_triangle(level-1)[i-1]
+                temp = pascal_triangle(level-1)
+                output[i] = temp[i] + temp[i-1]
         return output
 
 # test input number
 if len(args) == 1:
     if args[0].isdigit():
-        if int(args[0]) >= 0:
-            level = int(args[0])
-        else:
-            print('Please input positive number')
-            exit()
+        level = int(args[0])
+
 else:
     print('Please input level number again')
     exit()
