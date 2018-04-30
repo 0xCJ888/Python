@@ -98,8 +98,9 @@ while(count < 3600):
             if(not flagAdd):
                 queue.append(c)
             elif(len(queue) == 0):
-                testfile.write(('1 jobs in queue.\n'))
                 flagAdd = False
+                testfile.write('1 jobs in queue.\n\tQueue information:\n')
+                printJobList(coreList[tempCore])
                 printCoreList(coreList[tempCore])
 
     elif(len(queue) == 0):
