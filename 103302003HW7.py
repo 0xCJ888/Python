@@ -44,12 +44,18 @@ class Core():
     def waitCount(self):
         self.wait +=1 
 
-def printList(list):
-    for i in range(0,len(list)):
-        testfile.write( '\t\tjob: ' + str(list[i].getJob()) + 
-                        ' wait ' + str(list[i].getWait()) + ' ,' 
-                        ' priority ' +str(list[i].getPriority()) + ' , ' +
-                        str(list[i].getWorkTime()) + ' cycles.\n')
+def printJobList(pList):
+    testfile.write( '\t\tjob: ' + str(pList.getJob()) + 
+                    ' wait ' + str(pList.getWait()) + ' ,' 
+                    ' priority ' +str(pList.getPriority()) + ' , ' +
+                    str(pList.getWorkTime()) + ' cycles.\n')
+
+def printCoreList(pList):
+    testfile.write('\tcore ' + str(tempCore) + 
+                    ' run job ' + str(pList.getJob()) + 
+                    ' of priority ' + str(pList.getPriority()) + 
+                    ' (waiting ' +str(pList.getWait()) + ' times) ' + 
+                    'use ' + str(pList.getWorkTime()) + ' cycles.\n')
 
 count = 0
 job = 0
@@ -61,7 +67,8 @@ c = Core(0, 0, 0, 0)
 isCoreEmpty = []
 flagAdd = False
 
-testfile = open('testfile.txt', 'w')
+testfile = open('hw07_log_jobs.txt', 'w')
+testfile.write('Run Job Log \nHistory\n')
 while(count < 3600):
     testfile.write('Time ' + str(count) + ': ')
     if(job_gen()):  
@@ -86,22 +93,16 @@ while(count < 3600):
                 tempCore = core
                 core += 1
             flagAdd = False
-            testfile.write('\t\tjob ' + str(coreList[tempCore].getJob()) + 
-                            ': wait 0,' +
-                            ' priority ' + str(coreList[tempCore].getPriority()) + ', ' +
-                            str(coreList[tempCore].getWorkTime()) + 'cycles.\n')
-            testfile.write('\tcore ' + str(tempCore) + 
-                           ' run job ' + str(coreList[tempCore].getJob()) + 
-                           ' of priority ' + str(coreList[tempCore].getPriority()) + 
-                           ' (waiting 0 times) ' + 'use ' + str(coreList[tempCore].getWorkTime()) + ' cycles.\n')
+            printJobList(coreList[tempCore])
+            printCoreList(coreList[tempCore])
         else:
             if(not flagAdd):
                 queue.append(c)
-            else:
-                testfile.write('\t\tjob ' + str(coreList[tempCore].getJob()) + 
-                            ': wait 0,' +
-                            ' priority ' + str(coreList[tempCore].getPriority()) + ', ' +
-                            str(coreList[tempCore].getWorkTime()) + 'cycles.\n')
+            elif(len(queue) == 0):
+                testfile.write(('1 jobs in queue.\n'))
+                flagAdd = False
+                printCoreList(coreList[tempCore])
+
     elif(len(queue) == 0):
         testfile.write('0 jobs in queue.\n')
 
@@ -113,14 +114,16 @@ while(count < 3600):
                 flagAdd = True
                 break
 
-        testfile.write('\t' + str(len(queue)) + ' jobs in queue.\n')
-        printList(queue)
+        testfile.write(str(len(queue)) + ' jobs in queue.\n')
+        # print queue
+        for i in range(0,len(queue)):
+            printJobList(queue[i])
         if(flagAdd):
             flagAdd = False
             flagWaitOver = False
             # wait over 10 times
             for i in range(0, len(queue)):
-                if(queue[i].getWait == 11):
+                if(queue[i].getWait() > 10):
                     index = i
                     flagWaitOver = True
                     break
@@ -138,15 +141,9 @@ while(count < 3600):
                 index = queue.index(m)
 
             coreList[tempCore] = queue.pop(index)
-            testfile.write( '\t\tcore ' + str(tempCore) + 
-                            ' run job ' + str(coreList[tempCore].getJob()) + 
-                            ' of priority ' + str(coreList[tempCore].getPriority()) + 
-                            ' (waiting ' + str(coreList[tempCore].getWait()) + ' times) ' +
-                            ' use ' + str(coreList[tempCore].getWorkTime()) + ' cycles.\n')
+            printCoreList(coreList[tempCore])
             for i in range(0,len(queue)):
                 queue[i].waitCount()
-        elif(core >= 10 and len(queue) == 0):
-            testfile.write(('0 jobs in queue.\n'))
     # working
     for i in range(0,len(coreList)):
         isCoreEmpty[i] = coreList[i].working(flag_progress)
@@ -155,4 +152,11 @@ while(count < 3600):
             break
     count += 1
 
+testfile.write('Total ' + str(job) +' jobs.\n')
+testfile.write('\tExecuted ' + str(job - len(queue)) +' jobs.\n')
+if(len(queue) != 0):
+    testfile.write('\tStill on waiting ' + str(len(queue)))
+    testfile.write('\nOn waiting list:\n')
+    for i in range(len(queue)):
+        printJobList(queue[i])
 testfile.close()
