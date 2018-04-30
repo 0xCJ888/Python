@@ -1,5 +1,16 @@
 import random
 
+count = 0
+job = 0
+coreList = []
+queue = []
+core = 0
+tempCore = 0
+isCoreEmpty = []
+flagAdd = False
+flag_getjob = True
+flag_progress = False
+
 def job_gen():
     return random.random() < 0.18
 
@@ -9,8 +20,18 @@ def priority_gen():
 def workTime_gen():
     return random.randint(1, 100)
 
-flag_getjob = True
-flag_progress = False
+def printJobList(pList):
+    testfile.write( '\t\tjob: ' + str(pList.getJob()) + 
+                    ' wait ' + str(pList.getWait()) + ' ,' 
+                    ' priority ' +str(pList.getPriority()) + ' , ' +
+                    str(pList.getWorkTime()) + ' cycles.\n')
+
+def printCoreList(pList):
+    testfile.write('\tcore ' + str(tempCore) + 
+                    ' run job ' + str(pList.getJob()) + 
+                    ' of priority ' + str(pList.getPriority()) + 
+                    ' (waiting ' +str(pList.getWait()) + ' times) ' + 
+                    'use ' + str(pList.getWorkTime()) + ' cycles.\n')
 
 class Core():
     def __init__(self, job, priority, worktime, wait):
@@ -44,29 +65,7 @@ class Core():
     def waitCount(self):
         self.wait +=1 
 
-def printJobList(pList):
-    testfile.write( '\t\tjob: ' + str(pList.getJob()) + 
-                    ' wait ' + str(pList.getWait()) + ' ,' 
-                    ' priority ' +str(pList.getPriority()) + ' , ' +
-                    str(pList.getWorkTime()) + ' cycles.\n')
-
-def printCoreList(pList):
-    testfile.write('\tcore ' + str(tempCore) + 
-                    ' run job ' + str(pList.getJob()) + 
-                    ' of priority ' + str(pList.getPriority()) + 
-                    ' (waiting ' +str(pList.getWait()) + ' times) ' + 
-                    'use ' + str(pList.getWorkTime()) + ' cycles.\n')
-
-count = 0
-job = 0
-coreList = []
-queue = []
-core = 0
-tempCore = 0
 c = Core(0, 0, 0, 0)
-isCoreEmpty = []
-flagAdd = False
-
 testfile = open('hw07_log_jobs.txt', 'w')
 testfile.write('Run Job Log \nHistory\n')
 while(count < 3600):

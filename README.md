@@ -7,3 +7,4 @@
 > 5.random walk<br>
 > 6.from graph find road<br>
 > 7.priority queue<br>
+> 8.calculator<br>
