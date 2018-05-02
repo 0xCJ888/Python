@@ -12,68 +12,61 @@ class Calculator:
                 validExp += x
             else:
                 print('Syntax error')
-                return False
+                return 
         self.infix = validExp
+        return True
     def toPostfix(self):
         opStack = []
         postfix = ''
         tmp = 0
-        
-        if(self.__is_operators(self.infix[0])):
-            print('first')
+        if self.__is_operators(self.infix[0]):
             self.infix = '0'+ self.infix
-        print('infix',self.infix)
         for x in self.infix:
-            if(self.__is_operators(x) and self.__is_operators(tmp)):
-                print('tmp',tmp,'x',x)
+            if self.__is_operators(x) and self.__is_operators(tmp):
                 postfix += x
                 continue
             if self.__is__digit(x) or x == '.':
                 postfix += x
             elif self.__is_operators(x):
-                if(len(opStack) == 0):
+                if len(opStack) == 0:
                     opStack.append(x)
                     postfix += ' '
                 else:
-                    if(self.__is_priority(x) > self.__is_priority(opStack[-1])):
+                    if self.__is_priority(x) > self.__is_priority(opStack[-1]):
                         opStack.append(x)
                         postfix += ' '
                     else:
-                        while(len(opStack) != 0):
-                            postfix += ' ' + opStack.pop() + ' '
+                        postfix += ' ' + opStack.pop() + ' '
                         opStack.append(x)
             tmp = x
         while(len(opStack)!= 0):
             postfix += ' '+ opStack.pop() + ' '
-        print('postfix', postfix)
         p = postfix.split()
         return p
     def calc_postfix(self, postfix):
         stack = []
         for x in postfix:
             stack.append(x)
-            if(self.__is_operators(x)):
+            if self.__is_operators(x):
                 op = stack.pop()
                 num2 = stack.pop()
                 num1 = stack.pop()
-                print('op', op ,'num1',num1 ,'num2', num2)
-                if(not self.__is_float(num1) or not self.__is_float(num2)):
+                if not self.__is_float(num1) or not self.__is_float(num2):
                     print('Syntax error')
-                    return
+                    return 
                 else:
                     value = self.calc(op, float(num1), float(num2))
                     stack.append(str(value))
-        print(stack[0])
         return stack[0]
     @staticmethod
     def calc(op, p1, p2):
-        if(op == '+'):
+        if op == '+':
             return p1 + p2
-        elif(op == '-'):
+        elif op == '-':
             return p1 - p2
-        elif(op == '*'):
+        elif op == '*':
             return p1 * p2
-        elif(op == '/'):
+        elif op == '/':
             if(p2 == 0):
                 print('error')
                 return 
@@ -105,8 +98,10 @@ while(1):
     s = input('>')
     if(s == 'exit' or s == 'quit'):
         break
-    print(s)
     calc = Calculator(s)
-    calc.validch()
-    p = calc.toPostfix()
-    calc.calc_postfix(p)
+    isValid = calc.validch()
+    if isValid:
+        p = calc.toPostfix()
+        output = calc.calc_postfix(p)
+        if output:
+            print(output)
