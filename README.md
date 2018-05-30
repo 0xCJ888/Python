@@ -10,3 +10,4 @@
 > 8.calculator<br>
 > 9.read json<br>
 > 10.plotStudentIDNumber<br>
+> 11.data filter and plot<br>
