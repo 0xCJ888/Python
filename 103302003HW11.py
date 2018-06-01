@@ -7,7 +7,7 @@ import pandas as pd
 
 #matplotlib.rcParams.update({'font.size': 50})
 csv_file = "eg_csv_table_filter-sales.csv"
-batchProcess
+batchProcess = "batch-eg_csv_table_filter-sales.txt"
 headerList = []
 groupList = []
 unitList = []
@@ -15,28 +15,13 @@ groupPrint = []
 unitPrint = []
 pieList = []
 
-def main():
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "d:b:")
-    except:
-        print("Usage: %s [-d|-b] args...", sys.argv[0])
-        sys.exit(2)
 
-    for opt, arg in opts:
-        if opt == "-d":
-            global csv_file
-            csv_file = arg
-        elif opt == "-b":
-            batchProcess = arg
-        else:
-            assert False, "unhandled option"
-
-def inputStr():
+def inputStr(s):
     global csv_file
     global unitList
     global unitPrint
     isSaved = False
-    s = input('> ').split()
+
     if s[0] == "exit" or s == "quit":
         sys.exit()
     elif s[0] == "index":
@@ -212,9 +197,31 @@ def convert2targetList(targetListData, shiftIndex):
 
 
 if "__main__" == __name__:
-    main()
-    df = pd.read_csv(csv_file, header=0)
-    headerList = df.columns.values.tolist()
-    while(1):
-        inputStr()
-        clearList()
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "d:b:")
+    except:
+        print("Usage: %s [-d|-b] args...", sys.argv[0])
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt == "-d":
+            csv_file = arg
+            df = pd.read_csv(csv_file, header=0)
+            headerList = df.columns.values.tolist()
+            while(1):
+                s = input('> ').split()
+                inputStr(s)
+                clearList()
+        elif opt == "-b":
+            batchProcess = arg
+            batchFile = open(batchProcess, 'r')
+            filetext = batchFile.read().split(';')
+            for line in filetext:
+                df = pd.read_csv(csv_file, header=0)
+                headerList = df.columns.values.tolist()
+                tmpStream = line.split()
+                inputStr(tmpStream)
+                clearList()
+            batchFile.close()
+        else:
+            assert False, "unhandled option"
