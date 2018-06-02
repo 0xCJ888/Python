@@ -6,7 +6,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 #matplotlib.rcParams.update({'font.size': 50})
-csv_file = "eg_csv_table_filter-sales.csv"
+plt.rcParams['font.sans-serif'] = ['Noto Sans CJK TC']
+
+csv_file = "daily_power_supply.csv"
 batchProcess = "batch-eg_csv_table_filter-sales.txt"
 headerList = []
 groupList = []
@@ -39,58 +41,64 @@ def inputStr(s):
     elif s[0] == "save":
         isSaved = True
         saveFileName = s[1]
-    if s[0] == "list" or s[2] == "list":
-        if isSaved:
-            pltDf = convert2List(s[3:])
-            saveFile = open(saveFileName, 'w')
-            saveFile.write(pltDf.to_csv(sep='\t', index=False))
-            saveFile.close()
-        else:
-            pltDf = convert2List(s[1:])
-            print(pltDf.to_csv(sep='\t', index=False))
-        isSaved = False
-    if s[0] == "chart" or s[2] == "chart":
-        if isSaved:
-            shiftIndex = 2
-        else:
-            shiftIndex = 0
+    if len(s) != 1:
+        if s[0] == "list" or s[2] == "list":
+            if isSaved:
+                pltDf = convert2List(s[3:])
+                saveFile = open(saveFileName, 'w')
+                saveFile.write(pltDf.to_csv(sep='\t', index=False))
+                saveFile.close()
+            else:
+                pltDf = convert2List(s[1:])
+                print(pltDf.to_csv(sep='\t', index=False))
+            isSaved = False
+        if s[0] == "chart" or s[2] == "chart":
+            if isSaved:
+                shiftIndex = 2
+            else:
+                shiftIndex = 0
 
-        title = s[2+shiftIndex]
+            if csv_file == "eg_csv_table_filter-sales.csv":
+                strDate = "Date"
+            elif csv_file == "daily_power_supply.csv":
+                strDate = "日期"
 
-        if s[1+shiftIndex] == "pie":
-            pieList, pltDf = convert2targetList(s, shiftIndex)
-        else:
-            xlabel = s[3+shiftIndex]
-            ylabel = s[4+shiftIndex]
-            pltDf = convert2List(s[5+shiftIndex:])
+            title = s[2+shiftIndex]
 
-        if s[1+shiftIndex] == "line":
-            ax = pltDf.plot(x = 'Date', linewidth = 4)
-            ax.set_xlim(pltDf.Date.values[0], pltDf.Date.values[-1])
-        elif s[1+shiftIndex] == "stack":
-            ax = pltDf.plot.area(x = 'Date')
-            ax.set_xlim(pltDf.Date.values[0], pltDf.Date.values[-1])
-        elif  s[1+shiftIndex] == "bar":
-            ax = pltDf[pltDf.columns.values.tolist()].plot.bar(x = 'Date', fontsize = 20)
-            ax.set_xticklabels(pltDf.Date.values, rotation=0)
-        elif  s[1+shiftIndex] == "pie":
-            plt.pie(pieList, labels=pltDf.columns.values, autopct='%1.1f%%')
+            if s[1+shiftIndex] == "pie":
+                pieList, pltDf = convert2targetList(s, shiftIndex)
+            else:
+                xlabel = s[3+shiftIndex]
+                ylabel = s[4+shiftIndex]
+                pltDf = convert2List(s[5+shiftIndex:])
 
-        if s[1+shiftIndex] != "pie":
-            plt.title(title, fontsize=30)
-            plt.xlabel(xlabel, fontsize=25)
-            plt.ylabel(ylabel, fontsize=25)
-            plt.legend(loc = 'upper center', ncol = 3)
-        else:
-            targetDate = s[3+shiftIndex]
-            title = targetDate + title
-            plt.title(title, fontsize=30)
-        if isSaved:
-            plt.savefig(saveFileName, bbox_inches='tight')
-        else:
-            plt.show()
-        isSaved = False
-        plt.close()
+            if s[1+shiftIndex] == "line":
+                ax = pltDf.plot(x = strDate, linewidth = 4)
+                #ax.set_xlim(pltDf.Date.values[0], pltDf.Date.values[-1])
+            elif s[1+shiftIndex] == "stack":
+                ax = pltDf.plot.area(x = strDate)
+                #ax.set_xlim(pltDf.Date.values[0], pltDf.Date.values[-1])
+            elif  s[1+shiftIndex] == "bar":
+                ax = pltDf[pltDf.columns.values.tolist()].plot.bar(x = strDate, fontsize = 20)
+                ax.set_xticklabels(pltDf.Date.values, rotation=0)
+            elif  s[1+shiftIndex] == "pie":
+                plt.pie(pieList, labels=pltDf.columns.values, autopct='%1.1f%%')
+
+            if s[1+shiftIndex] != "pie":
+                plt.title(title, fontsize=30)
+                plt.xlabel(xlabel, fontsize=25)
+                plt.ylabel(ylabel, fontsize=25)
+                plt.legend(loc = 'upper center', ncol = 3)
+            else:
+                targetDate = s[3+shiftIndex]
+                title = targetDate + title
+                plt.title(title, fontsize=30)
+            if isSaved:
+                plt.savefig(saveFileName, bbox_inches='tight')
+            else:
+                plt.show()
+            isSaved = False
+            plt.close()
 
 def determineList(stri):
     global groupList
@@ -130,16 +138,23 @@ def determineGroup():
     for hData in headerList:
         for gData in groupList:
             if hData.find(tmpHeader) == 0:
-                if hData.find(gData):
+                tmpIndex = headerList.index(hData)
+                if gData.isdigit() and tmpIndex == int(gData):
                     groupPrint.append(hData)
                     groupList.remove(gData)
                     break
 
 def determineDateIndex(startDate, endDate):
+    global csv_file
     tmpIndex = 0
     startIndex = 0
     endIndex = 0
-    for date in df["Date" or "日期"]:
+    if csv_file == "eg_csv_table_filter-sales.csv":
+        strDate = "Date"
+    elif csv_file == "daily_power_supply.csv":
+        strDate = "日期"
+
+    for date in df[strDate]:
         if date == startDate:
             startIndex = tmpIndex
         elif date == endDate:
@@ -170,10 +185,18 @@ def convert2List(listData):
     determineList(listData[2:])
     determineUnit(unitList)
     startIndex, endIndex = determineDateIndex(startDate, endDate)
-    groupName = groupList[0]
-    determineGroup()
-    df[groupName] = df.loc[startIndex:endIndex, groupPrint].sum(axis=1)
-    pltDf = df.iloc[startIndex:endIndex, [0]+[-1]+unitList]
+    numberGroup = 1
+    if len(groupList) == 0:
+        pltDf = df.iloc[startIndex:endIndex, [0]+unitList]
+    while len(groupList) != 0:
+        groupName = groupList[0]
+        determineGroup()
+        print("groupPrint", groupPrint)
+        df[groupName] = df.loc[startIndex:endIndex, groupPrint].sum(axis=1)
+        numberGroup += 1
+        groupPrint.clear()
+    numberGroupList = list(range(-1, -numberGroup, -1))
+    pltDf = df.iloc[startIndex:endIndex, [0]+numberGroupList+unitList]
     return pltDf
 
 def convert2targetList(targetListData, shiftIndex):
@@ -208,6 +231,7 @@ if "__main__" == __name__:
             csv_file = arg
             df = pd.read_csv(csv_file, header=0)
             headerList = df.columns.values.tolist()
+            print("headerList", headerList)
             while(1):
                 s = input('> ').split()
                 inputStr(s)
