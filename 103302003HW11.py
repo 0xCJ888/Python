@@ -24,7 +24,7 @@ def inputStr(s):
     global unitPrint
     isSaved = False
 
-    if s[0] == "exit" or s == "quit":
+    if s[0] == "exit" or s[0] == "quit":
         sys.exit()
     elif s[0] == "index":
          print("Index\tData Name")
@@ -238,7 +238,7 @@ if "__main__" == __name__:
                 clearList()
         elif opt == "-b":
             batchProcess = arg
-            batchFile = open(batchProcess, 'r')
+            batchFile = open(batchProcess, 'r', encoding = 'utf8')
             filetext = batchFile.read().split(';')
             for line in filetext:
                 df = pd.read_csv(csv_file, header=0)
