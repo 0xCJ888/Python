@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import getopt
 import sys
 
@@ -74,13 +75,24 @@ def inputStr(s):
 
             if s[1+shiftIndex] == "line":
                 ax = pltDf.plot(x = strDate, linewidth = 4)
-                #ax.set_xlim(pltDf.Date.values[0], pltDf.Date.values[-1])
+                if csv_file == "eg_csv_table_filter-sales.csv":
+                    ax.set_xlim(pltDf.Date.values[0], pltDf.Date.values[-1])
+                elif csv_file == "daily_power_supply.csv":
+                    ax.set_xlim(pltDf.日期.values[0], pltDf.日期.values[-1])
             elif s[1+shiftIndex] == "stack":
                 ax = pltDf.plot.area(x = strDate)
-                #ax.set_xlim(pltDf.Date.values[0], pltDf.Date.values[-1])
+                if csv_file == "eg_csv_table_filter-sales.csv":
+                    ax.set_xlim(pltDf.Date.values[0], pltDf.Date.values[-1])
+                elif csv_file == "daily_power_supply.csv":
+                    ax.set_xlim(pltDf.日期.values[0], pltDf.日期.values[-1])
             elif  s[1+shiftIndex] == "bar":
+                #print(pltDf)
+                #print(pltDf.columns.values.tolist())
                 ax = pltDf[pltDf.columns.values.tolist()].plot.bar(x = strDate, fontsize = 20)
-                ax.set_xticklabels(pltDf.Date.values, rotation=0)
+                if csv_file == "eg_csv_table_filter-sales.csv":
+                    ax.set_xticklabels(pltDf.Date.values, rotation=0)
+                elif csv_file == "daily_power_supply.csv":
+                    ax.set_xticklabels(pltDf.日期.values, rotation=0)
             elif  s[1+shiftIndex] == "pie":
                 plt.pie(pieList, labels=pltDf.columns.values, autopct='%1.1f%%')
 
@@ -135,14 +147,21 @@ def determineGroup():
     global headerList
     tmpHeader = groupList[0]
     groupList.pop(0)
+    tmpIndex = -1
     for hData in headerList:
         for gData in groupList:
-            if hData.find(tmpHeader) == 0:
-                tmpIndex = headerList.index(hData)
-                if gData.isdigit() and tmpIndex == int(gData):
-                    groupPrint.append(hData)
-                    groupList.remove(gData)
-                    break
+            tmpIndex = headerList.index(hData)
+            #print("tmpindex", tmpIndex)
+            #print("hData", hData)
+            if gData.isdigit():
+                intGData = int(gData)
+                #print("intGDATA", intGData)
+            else:
+                break
+            #print(intGData.isdigit())
+            if tmpIndex == intGData:
+                groupPrint.append(hData)
+                groupList.remove(gData)
 
 def determineDateIndex(startDate, endDate):
     global csv_file
@@ -160,12 +179,20 @@ def determineDateIndex(startDate, endDate):
         elif date == endDate:
             endIndex = tmpIndex+1
         tmpIndex += 1
+
+    if startDate == endDate:
+        endIndex = startIndex + 1
     return startIndex, endIndex
 
 def determineTargetDate(targetDate):
     tmpIndex = 0
     targetIndex = 0
-    for date in df["Date" or "日期"]:
+    if csv_file == "eg_csv_table_filter-sales.csv":
+        strDate = "Date"
+    elif csv_file == "daily_power_supply.csv":
+        strDate = "日期"
+        
+    for date in df[strDate]:
         if date == int(targetDate):
             targetIndex = tmpIndex
             return targetIndex
@@ -191,7 +218,7 @@ def convert2List(listData):
     while len(groupList) != 0:
         groupName = groupList[0]
         determineGroup()
-        print("groupPrint", groupPrint)
+        #print("groupPrint", groupPrint)
         df[groupName] = df.loc[startIndex:endIndex, groupPrint].sum(axis=1)
         numberGroup += 1
         groupPrint.clear()
@@ -209,6 +236,9 @@ def convert2targetList(targetListData, shiftIndex):
     while len(groupList)!=0:
         groupName = groupList[0]
         determineGroup()
+        #print("groupName", groupName)
+        #print("groupList", groupList)
+        #print("groupPrint", groupPrint)
         df[groupName] = df.loc[targetIndex:targetIndex, groupPrint].sum(axis=1)
         numberGroup += 1
         groupPrint.clear()
@@ -218,34 +248,38 @@ def convert2targetList(targetListData, shiftIndex):
         pieList = i
     return pieList, pltDf
 
-
 if "__main__" == __name__:
     try:
         opts, args = getopt.getopt(sys.argv[1:], "d:b:")
     except:
         print("Usage: %s [-d|-b] args...", sys.argv[0])
         sys.exit(2)
-
-    for opt, arg in opts:
-        if opt == "-d":
-            csv_file = arg
-            df = pd.read_csv(csv_file, header=0)
-            headerList = df.columns.values.tolist()
-            print("headerList", headerList)
-            while(1):
-                s = input('> ').split()
-                inputStr(s)
-                clearList()
-        elif opt == "-b":
-            batchProcess = arg
-            batchFile = open(batchProcess, 'r', encoding = 'utf8')
-            filetext = batchFile.read().split(';')
-            for line in filetext:
+    if len(opts)!=0:
+        for opt, arg in opts:
+            if opt == "-d":
+                csv_file = arg
                 df = pd.read_csv(csv_file, header=0)
                 headerList = df.columns.values.tolist()
-                tmpStream = line.split()
-                inputStr(tmpStream)
-                clearList()
-            batchFile.close()
-        else:
-            assert False, "unhandled option"
+            elif opt == "-b":
+                batchProcess = arg
+                batchFile = open(batchProcess, 'r', encoding = 'utf8')
+                filetext = batchFile.read().split(';')
+                for line in filetext:
+                    #print(line)
+                    if len(line) != 1:
+                        df = pd.read_csv(csv_file, header=0)
+                        headerList = df.columns.values.tolist()
+                        tmpStream = line.split()
+                        inputStr(tmpStream)
+                        clearList()
+                batchFile.close()
+            else:
+                assert False, "unhandled option"
+    else:
+        df = pd.read_csv(csv_file, header=0)
+        headerList = df.columns.values.tolist()
+        print(headerList)
+        while(1):
+            s = input('> ').split()
+            inputStr(s)
+            clearList()
