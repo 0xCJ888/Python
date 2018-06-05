@@ -1,0 +1,29 @@
+save eg_sales.csv list 170101 170105 group City 2 4 5 unit 3 unit 6;
+
+chart line Jan Date Sales 170101 170105 group City 2 4 5 unit 3 unit 6;
+chart stack Jan Date Sales 170103 170107 group City 2 4 5 unit 3 unit 6;
+chart bar Jan Date Sales 170101 170103 group City 2 4 5 unit 3 unit 6;
+chart pie Parts 170105 group City 2 4 5 unit 3 unit 6 group Store 1 7;
+chart pie City 170105 unit 2 unit 4 unit 5;
+
+
+save eg_sales-line.png 
+    chart line Jan Date Sales 170101 170105 
+        group City 2 4 5 
+        unit 3 
+        unit 6;
+
+save eg_sales-stack.png 
+    chart stack Jan Date Sales 170103 170107 
+        group City 2 4 5 
+        unit 3 
+        unit 6;
+
+save eg_sales-bar.png 
+    chart bar Jan Date Sales 170101 170103 group City 2 4 5 unit 3 unit 6;
+
+save eg_sales-pie.png 
+    chart pie Parts 170105 group City 2 4 5 unit 3 unit 6 group Store 1 7;
+
+save city.png chart 
+    pie City 170105 unit 2 unit 4 unit 5

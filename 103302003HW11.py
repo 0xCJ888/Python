@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import getopt
 import sys
 
@@ -6,8 +5,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 
-#matplotlib.rcParams.update({'font.size': 50})
-plt.rcParams['font.sans-serif'] = ['Noto Sans CJK TC']
+#plt.rcParams['font.sans-serif'] = ['Noto Sans CJK TC']
 
 csv_file = "daily_power_supply.csv"
 batchProcess = "batch-eg_csv_table_filter-sales.txt"
@@ -36,13 +34,16 @@ def inputStr(s):
         for i in range(len(headerList)):
             print(headerList[i])
     elif s[0] == "find":
-        print(df[s[1:]])
+        print(df[s[1:]].to_csv(sep='\t', index=False))
     elif s[0] == "help":
-        pass
+        if len(s) == 1:
+            print("you can use help XXX to see more details....")
+        elif len(s) == 2:
+            helpUsage(s[1])
     elif s[0] == "save":
         isSaved = True
         saveFileName = s[1]
-    if len(s) != 1:
+    if len(s) > 2:
         if s[0] == "list" or s[2] == "list":
             if isSaved:
                 pltDf = convert2List(s[3:])
@@ -86,8 +87,6 @@ def inputStr(s):
                 elif csv_file == "daily_power_supply.csv":
                     ax.set_xlim(pltDf.日期.values[0], pltDf.日期.values[-1])
             elif  s[1+shiftIndex] == "bar":
-                #print(pltDf)
-                #print(pltDf.columns.values.tolist())
                 ax = pltDf[pltDf.columns.values.tolist()].plot.bar(x = strDate, fontsize = 20)
                 if csv_file == "eg_csv_table_filter-sales.csv":
                     ax.set_xticklabels(pltDf.Date.values, rotation=0)
@@ -151,14 +150,10 @@ def determineGroup():
     for hData in headerList:
         for gData in groupList:
             tmpIndex = headerList.index(hData)
-            #print("tmpindex", tmpIndex)
-            #print("hData", hData)
             if gData.isdigit():
                 intGData = int(gData)
-                #print("intGDATA", intGData)
             else:
                 break
-            #print(intGData.isdigit())
             if tmpIndex == intGData:
                 groupPrint.append(hData)
                 groupList.remove(gData)
@@ -218,7 +213,6 @@ def convert2List(listData):
     while len(groupList) != 0:
         groupName = groupList[0]
         determineGroup()
-        #print("groupPrint", groupPrint)
         df[groupName] = df.loc[startIndex:endIndex, groupPrint].sum(axis=1)
         numberGroup += 1
         groupPrint.clear()
@@ -236,9 +230,6 @@ def convert2targetList(targetListData, shiftIndex):
     while len(groupList)!=0:
         groupName = groupList[0]
         determineGroup()
-        #print("groupName", groupName)
-        #print("groupList", groupList)
-        #print("groupPrint", groupPrint)
         df[groupName] = df.loc[targetIndex:targetIndex, groupPrint].sum(axis=1)
         numberGroup += 1
         groupPrint.clear()
@@ -248,6 +239,27 @@ def convert2targetList(targetListData, shiftIndex):
         pieList = i
     return pieList, pltDf
 
+def helpUsage(cli):
+    if cli == "save":
+        print("command : save fileName chart ... or line...")
+    elif cli == "index":
+        print("output to terminal with all data and index")
+    elif cli == "name":
+        print("output to terminal with all data")
+    elif cli == "list":
+        print("filter data")
+        print("command : list startDate endDate data")
+    elif cli == "find":
+        print("command : find dataName1 dataName2")
+    elif cli == "chart":
+        print("chart data")
+        print("you can plot four kinds of pictures")
+        print("plotKinds : line, stack, bar expect pie")
+        print("command : chart plotKinds title xlabel ylabel startDate endDate data")
+        print("command for pie")
+        print("command : chart pie title targetDate data")
+    else:
+        print("No command for ", cli)
 if "__main__" == __name__:
     try:
         opts, args = getopt.getopt(sys.argv[1:], "d:b:")
@@ -265,7 +277,6 @@ if "__main__" == __name__:
                 batchFile = open(batchProcess, 'r', encoding = 'utf8')
                 filetext = batchFile.read().split(';')
                 for line in filetext:
-                    #print(line)
                     if len(line) != 1:
                         df = pd.read_csv(csv_file, header=0)
                         headerList = df.columns.values.tolist()
