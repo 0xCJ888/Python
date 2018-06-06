@@ -11,3 +11,4 @@
 > 9.read json<br>
 > 10.plotStudentIDNumber<br>
 > 11.data filter and plot<br>
+> 12.solve heat transfer function
